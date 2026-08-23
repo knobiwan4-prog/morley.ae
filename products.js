@@ -1,4 +1,5 @@
 /* Permanent product catalog. Keep preview files in GitHub's previews folder and use their raw URLs here. */
+window.SCENEPACK_DOWNLOAD_PASSWORD = "ENDLESSAUDIOS";
 window.PRODUCTS_DATA = [
     {
         id: 1,
