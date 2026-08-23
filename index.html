@@ -48,13 +48,12 @@
             opacity: 0.55;
             filter: none;
             background: conic-gradient(from 120deg at 30% 40%, rgba(0, 242, 254, 0.16), transparent 32%, rgba(79, 172, 254, 0.1) 58%, transparent 78%);
-            animation: ambient-drift 24s ease-in-out infinite alternate;
+            animation: none;
         }
         body::after {
             opacity: 0.3;
             background: radial-gradient(circle at 70% 20%, rgba(0, 242, 254, 0.2), transparent 30%), radial-gradient(circle at 20% 80%, rgba(79, 172, 254, 0.12), transparent 28%);
-            animation-duration: 32s;
-            animation-direction: alternate-reverse;
+            animation: none;
         }
         main, footer { position: relative; z-index: 1; }
         ::-webkit-scrollbar {
@@ -75,11 +74,6 @@
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(30, 58, 96, 0.5);
-        }
-        @keyframes ambient-drift {
-            0% { transform: translate3d(-4%, -2%, 0) rotate(0deg) scale(1); }
-            50% { transform: translate3d(3%, 4%, 0) rotate(8deg) scale(1.08); }
-            100% { transform: translate3d(-2%, 1%, 0) rotate(-5deg) scale(1.03); }
         }
         @keyframes float {
             0%, 100% { transform: translateY(0px); }
@@ -132,9 +126,8 @@
     <!-- Main Content Container -->
     <main class="flex-grow max-w-5xl w-full mx-auto px-4 sm:px-6 py-12 relative z-10">
 
-        <!-- ================= SECTION 1: HOME / LINK OVERVIEW ================= -->
-        <section id="homeView" class="space-y-8">
-            <div class="text-center space-y-6 py-6 flex flex-col items-center">
+        <!-- Persistent profile and navigation -->
+        <header id="siteHeader" class="text-center space-y-6 py-6 flex flex-col items-center">
                 <div class="relative w-32 h-32 sm:w-40 sm:h-40 rounded-full border-4 border-neon-blue/40 shadow-glow-lg overflow-hidden animate-float">
                     <img src="image_0.png" alt="Main Profile Picture" class="w-full h-full object-cover">
                     <div class="absolute inset-0 ring-2 ring-inset ring-neon-light/30 rounded-full"></div>
@@ -146,7 +139,6 @@
                     </h1>
                 </div>
 
-                <!-- Navigation Tabs (Hub / Presets) -->
                 <div class="flex items-center space-x-3 pt-2">
                     <button onclick="switchView('home')" id="navHomeBtn" class="px-5 py-2 rounded-xl text-xs font-bold transition-all duration-300 bg-neon-blue/10 text-neon-blue border border-neon-blue/30 shadow-glow">
                         Links
@@ -158,7 +150,10 @@
                         Scenepacks
                     </button>
                 </div>
-            </div>
+        </header>
+
+        <!-- ================= SECTION 1: HOME / LINK OVERVIEW ================= -->
+        <section id="homeView" class="space-y-8">
 
             <!-- Links List -->
             <div class="space-y-4 max-w-3xl mx-auto" id="linkListContainer">
@@ -197,7 +192,6 @@
                             <span class="hidden sm:inline-flex justify-center text-center px-3 py-1.5 rounded-xl bg-neon-blue/10 text-neon-blue text-xs font-semibold">
                                 View Shop
                             </span>
-                            <div class="w-9 h-9 opacity-0 pointer-events-none"></div>
                         </div>
                     </div>
                 </div>
