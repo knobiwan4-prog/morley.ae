@@ -28,19 +28,8 @@
 </head>
 <body>
 <main>
-    <section id="loginPanel" class="panel" style="max-width:460px;margin:10vh auto 0">
-        <h1>Private Admin</h1>
-        <p id="loginIntro" class="muted">Set a local password for this admin tool. It is never written into products.js.</p>
-        <form id="loginForm" class="stack">
-            <label>Password<input id="password" type="password" minlength="12" autocomplete="new-password" required></label>
-            <label id="confirmWrap">Confirm password<input id="confirmPassword" type="password" minlength="12" autocomplete="new-password" required></label>
-            <p id="loginError" class="status"></p>
-            <button class="primary" type="submit">Unlock Admin</button>
-        </form>
-    </section>
-
-    <section id="adminPanel" class="hidden">
-        <header><div><h1>Morley.ae Admin</h1><p class="muted">Local editor for the versioned <strong>products.js</strong> catalog.</p></div><button id="lockButton" class="secondary" type="button">Lock</button></header>
+    <section id="adminPanel">
+        <header><div><h1>Morley.ae Admin</h1><p class="muted">Local editor for the versioned <strong>products.js</strong> catalog.</p></div></header>
         <p class="warning"><strong>Workflow:</strong> edit here, download the generated <strong>products.js</strong>, replace the repository file with it, then commit/push it to GitHub. Only that upload makes changes permanent for every visitor.</p>
         <div class="stack">
             <section class="panel"><div class="actions" style="justify-content:space-between"><h2>Products and Scenepacks</h2><button id="newButton" class="secondary" type="button">New product</button></div><div id="productList" class="product-list"></div></section>
@@ -66,7 +55,6 @@
 </main>
 <script src="products.js"></script>
 <script>
-    const ADMIN_KEY = 'morley_admin_password_hash';
     const CATALOG_KEY = 'morley_admin_catalog';
     const PASSWORD_KEY = 'morley_download_password';
     let products = [];
@@ -75,27 +63,6 @@
     const clone = value => JSON.parse(JSON.stringify(value));
     const mediaFromText = value => value.split('\n').map(url => url.trim()).filter(Boolean).map(src => ({ type: /\\.(mp4|webm|mov)(\\?.*)?$/i.test(src) ? 'video' : 'image', src }));
     const textFromMedia = media => (media || []).map(item => item.src).join('\n');
-
-    async function hashPassword(value, salt) {
-        const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(value), 'PBKDF2', false, ['deriveBits']);
-        const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: new TextEncoder().encode(salt), iterations: 150000, hash: 'SHA-256' }, key, 256);
-        return Array.from(new Uint8Array(bits), byte => byte.toString(16).padStart(2, '0')).join('');
-    }
-
-    async function unlock(event) {
-        event.preventDefault();
-        const password = $('password').value;
-        const saved = localStorage.getItem(ADMIN_KEY);
-        if (!saved) {
-            if (password.length < 12 || password !== $('confirmPassword').value) { $('loginError').textContent = 'Use at least 12 matching characters.'; return; }
-            const salt = crypto.getRandomValues(new Uint8Array(16)).join('-');
-            localStorage.setItem(ADMIN_KEY, JSON.stringify({ salt, hash: await hashPassword(password, salt) }));
-        } else {
-            const credentials = JSON.parse(saved);
-            if (await hashPassword(password, credentials.salt) !== credentials.hash) { $('loginError').textContent = 'Incorrect password.'; return; }
-        }
-        $('loginPanel').classList.add('hidden'); $('adminPanel').classList.remove('hidden'); loadCatalog(); renderList(); resetForm();
-    }
 
     function loadCatalog() {
         const saved = localStorage.getItem(CATALOG_KEY);
@@ -136,10 +103,9 @@
         const link = document.createElement('a'); link.href = URL.createObjectURL(new Blob([output], { type: 'text/javascript' })); link.download = 'products.js'; link.click(); URL.revokeObjectURL(link.href); $('saveStatus').textContent = 'products.js downloaded. Replace the repository file and push it to GitHub.';
     }
 
-    $('loginForm').onsubmit = unlock; $('productForm').onsubmit = saveProduct; $('newButton').onclick = resetForm; $('cancelButton').onclick = resetForm; $('downloadButton').onclick = downloadCatalog;
-    $('lockButton').onclick = () => { $('adminPanel').classList.add('hidden'); $('loginPanel').classList.remove('hidden'); $('password').value = ''; };
+    $('productForm').onsubmit = saveProduct; $('newButton').onclick = resetForm; $('cancelButton').onclick = resetForm; $('downloadButton').onclick = downloadCatalog;
     $('resetButton').onclick = () => { if (!confirm('Discard local catalog changes and reload products.js?')) return; localStorage.removeItem(CATALOG_KEY); loadCatalog(); renderList(); resetForm(); $('saveStatus').textContent = 'Local changes reset.'; };
-    if (localStorage.getItem(ADMIN_KEY)) { $('loginIntro').textContent = 'Enter your local admin password to edit the catalog.'; $('confirmWrap').classList.add('hidden'); $('confirmPassword').required = false; }
+    loadCatalog(); renderList(); resetForm();
 </script>
 </body>
 </html>
