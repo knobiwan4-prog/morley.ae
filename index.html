@@ -46,13 +46,13 @@
             pointer-events: none;
             z-index: 0;
             opacity: 0.55;
-            filter: blur(30px);
-            background: conic-gradient(from 120deg at 30% 40%, rgba(0, 242, 254, 0.16), transparent 24%, rgba(60, 90, 255, 0.12) 42%, transparent 67%, rgba(16, 185, 129, 0.1) 84%, transparent);
+            filter: none;
+            background: conic-gradient(from 120deg at 30% 40%, rgba(0, 242, 254, 0.16), transparent 32%, rgba(79, 172, 254, 0.1) 58%, transparent 78%);
             animation: ambient-drift 24s ease-in-out infinite alternate;
         }
         body::after {
             opacity: 0.3;
-            background: radial-gradient(circle at 70% 20%, rgba(0, 242, 254, 0.2), transparent 30%), radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.18), transparent 28%);
+            background: radial-gradient(circle at 70% 20%, rgba(0, 242, 254, 0.2), transparent 30%), radial-gradient(circle at 20% 80%, rgba(79, 172, 254, 0.12), transparent 28%);
             animation-duration: 32s;
             animation-direction: alternate-reverse;
         }
@@ -85,6 +85,24 @@
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-8px); }
         }
+        @keyframes view-enter {
+            0% { opacity: 0; transform: translateY(28px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes build-item {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes initial-build {
+            0%, 18% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; pointer-events: none; }
+        }
+        .view-enter { animation: view-enter 900ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+        .view-enter > * { animation: build-item 800ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+        .view-enter > *:nth-child(2) { animation-delay: 180ms; }
+        .view-enter > *:nth-child(3) { animation-delay: 360ms; }
+        .view-enter > *:nth-child(4) { animation-delay: 540ms; }
+        .initial-build { animation: initial-build 1800ms ease-out forwards; }
         .animate-float {
             animation: float 5s ease-in-out infinite;
         }
@@ -95,6 +113,18 @@
     </style>
 </head>
 <body class="min-h-screen flex flex-col relative selection:bg-neon-blue selection:text-black">
+
+    <div id="initialBuild" class="initial-build fixed inset-0 z-50 flex items-center justify-center bg-[#050b14]">
+        <div class="text-center space-y-4">
+            <div class="mx-auto w-14 h-14 rounded-2xl border border-neon-blue/50 bg-neon-blue/10 flex items-center justify-center shadow-glow-lg animate-pulse">
+                <span class="text-xl font-black italic text-neon-blue">AE</span>
+            </div>
+            <div class="space-y-2">
+                <p class="text-sm font-bold tracking-[0.25em] text-white uppercase">morley.ae</p>
+                <div class="h-1 w-32 overflow-hidden rounded-full bg-slate-800 mx-auto"><div class="h-full w-1/2 bg-neon-blue animate-pulse"></div></div>
+            </div>
+        </div>
+    </div>
 
     <!-- Ambient Background -->
     <div class="fixed inset-0 pointer-events-none opacity-20" style="background-image: linear-gradient(rgba(148,163,184,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(148,163,184,.08) 1px, transparent 1px); background-size: 64px 64px; mask-image: linear-gradient(to bottom, black, transparent 85%);"></div>
@@ -119,7 +149,7 @@
                 <!-- Navigation Tabs (Hub / Presets) -->
                 <div class="flex items-center space-x-3 pt-2">
                     <button onclick="switchView('home')" id="navHomeBtn" class="px-5 py-2 rounded-xl text-xs font-bold transition-all duration-300 bg-neon-blue/10 text-neon-blue border border-neon-blue/30 shadow-glow">
-                        Hub Links
+                        Links
                     </button>
                     <button onclick="switchView('presets')" id="navPresetsBtn" class="px-5 py-2 rounded-xl text-xs font-bold transition-all duration-300 text-slate-300 hover:text-white bg-white/5 border border-slate-800">
                         Presets Shop
@@ -137,15 +167,15 @@
                 <a href="https://discord.gg/ehVMQtUacr" target="_blank" class="block glass-panel rounded-2xl p-4 sm:p-5 transition-all duration-300 hover:border-neon-blue/60 hover:shadow-glow group cursor-pointer">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 rounded-xl bg-[#5865F2]/20 border border-[#5865F2]/40 flex items-center justify-center group-hover:scale-110 transition-transform overflow-hidden">
-                                <img src="https://cdn.simpleicons.org/discord/5865F2" alt="Discord" class="w-7 h-7 object-contain">
+                            <div class="w-12 h-12 rounded-xl bg-neon-blue/20 border border-neon-blue/40 flex items-center justify-center group-hover:scale-110 transition-transform overflow-hidden">
+                                <img src="https://cdn.simpleicons.org/discord/00f2fe" alt="Discord" class="w-7 h-7 object-contain">
                             </div>
                             <div>
                                 <h3 class="font-bold text-lg text-white group-hover:text-neon-blue transition-colors">EndlessAudios™ - Discord Server</h3>
                             </div>
                         </div>
                         <div class="flex items-center space-x-3">
-                            <span class="hidden sm:inline-flex px-3 py-1.5 rounded-xl bg-[#5865F2]/20 text-[#5865F2] text-xs font-semibold">
+                            <span class="hidden sm:inline-flex justify-center text-center px-3 py-1.5 rounded-xl bg-neon-blue/10 text-neon-blue text-xs font-semibold">
                                 Join Server
                             </span>
                         </div>
@@ -164,7 +194,7 @@
                             </div>
                         </div>
                         <div class="flex items-center space-x-3">
-                            <span class="hidden sm:inline-flex px-3 py-1.5 rounded-xl bg-neon-blue/10 text-neon-blue text-xs font-semibold">
+                            <span class="hidden sm:inline-flex justify-center text-center px-3 py-1.5 rounded-xl bg-neon-blue/10 text-neon-blue text-xs font-semibold">
                                 View Shop
                             </span>
                             <div class="w-9 h-9 opacity-0 pointer-events-none"></div>
@@ -173,17 +203,17 @@
                 </div>
 
                 <!-- Link 3: Scene Packs -->
-                <div onclick="switchView('scenepacks')" class="block glass-panel rounded-2xl p-4 sm:p-5 transition-all duration-300 hover:border-emerald-400/60 hover:shadow-glow group cursor-pointer">
+                <div onclick="switchView('scenepacks')" class="block glass-panel rounded-2xl p-4 sm:p-5 transition-all duration-300 hover:border-neon-blue/60 hover:shadow-glow group cursor-pointer">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 rounded-xl bg-emerald-400/20 border border-emerald-400/40 flex items-center justify-center text-emerald-300 group-hover:scale-110 transition-transform">
-                                <img src="https://cdn.simpleicons.org/stackshare/34d399" alt="Scenepacks" class="w-7 h-7 object-contain">
+                            <div class="w-12 h-12 rounded-xl bg-neon-blue/20 border border-neon-blue/40 flex items-center justify-center text-neon-blue group-hover:scale-110 transition-transform">
+                                <img src="https://cdn.simpleicons.org/stackshare/00f2fe" alt="Scenepacks" class="w-7 h-7 object-contain">
                             </div>
                             <div>
-                                <h3 class="font-bold text-lg text-white group-hover:text-emerald-300 transition-colors">Scene Packs - Morley.ae</h3>
+                                <h3 class="font-bold text-lg text-white group-hover:text-neon-blue transition-colors">Scene Packs - Morley.ae</h3>
                             </div>
                         </div>
-                        <span class="hidden sm:inline-flex px-3 py-1.5 rounded-xl bg-emerald-400/10 text-emerald-300 text-xs font-semibold">View Packs</span>
+                        <span class="hidden sm:inline-flex justify-center text-center px-3 py-1.5 rounded-xl bg-neon-blue/10 text-neon-blue text-xs font-semibold">View Packs</span>
                     </div>
                 </div>
 
@@ -191,15 +221,15 @@
                 <a href="https://www.tiktok.com/@endlessaudioss" target="_blank" class="block glass-panel rounded-2xl p-4 sm:p-5 transition-all duration-300 hover:border-neon-blue/60 hover:shadow-glow group cursor-pointer">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 rounded-xl bg-pink-500/20 border border-pink-500/40 flex items-center justify-center text-pink-400 group-hover:scale-110 transition-transform overflow-hidden">
-                                <img src="https://cdn.simpleicons.org/tiktok/ff4f9a" alt="TikTok" class="w-7 h-7 object-contain">
+                            <div class="w-12 h-12 rounded-xl bg-neon-blue/20 border border-neon-blue/40 flex items-center justify-center text-neon-blue group-hover:scale-110 transition-transform overflow-hidden">
+                                <img src="https://cdn.simpleicons.org/tiktok/00f2fe" alt="TikTok" class="w-7 h-7 object-contain">
                             </div>
                             <div>
                                 <h3 class="font-bold text-lg text-white group-hover:text-neon-blue transition-colors">EndlessAudios™ - TikTok</h3>
                             </div>
                         </div>
                         <div class="flex items-center space-x-3">
-                            <span class="hidden sm:inline-flex px-3 py-1.5 rounded-xl bg-pink-500/20 text-pink-400 text-xs font-semibold">
+                            <span class="hidden sm:inline-flex justify-center text-center px-3 py-1.5 rounded-xl bg-neon-blue/10 text-neon-blue text-xs font-semibold">
                                 Open TikTok
                             </span>
                         </div>
@@ -210,15 +240,15 @@
                 <a href="https://www.tiktok.com/@morley.ae" target="_blank" class="block glass-panel rounded-2xl p-4 sm:p-5 transition-all duration-300 hover:border-neon-blue/60 hover:shadow-glow group cursor-pointer">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 rounded-xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform overflow-hidden">
-                                <img src="https://cdn.simpleicons.org/tiktok/a78bfa" alt="TikTok" class="w-7 h-7 object-contain">
+                            <div class="w-12 h-12 rounded-xl bg-neon-blue/20 border border-neon-blue/40 flex items-center justify-center text-neon-blue group-hover:scale-110 transition-transform overflow-hidden">
+                                <img src="https://cdn.simpleicons.org/tiktok/00f2fe" alt="TikTok" class="w-7 h-7 object-contain">
                             </div>
                             <div>
                                 <h3 class="font-bold text-lg text-white group-hover:text-neon-blue transition-colors">Morley.ae - TikTok</h3>
                             </div>
                         </div>
                         <div class="flex items-center space-x-3">
-                            <span class="hidden sm:inline-flex px-3 py-1.5 rounded-xl bg-purple-500/20 text-purple-400 text-xs font-semibold">
+                            <span class="hidden sm:inline-flex justify-center text-center px-3 py-1.5 rounded-xl bg-neon-blue/10 text-neon-blue text-xs font-semibold">
                                 Open TikTok
                             </span>
                         </div>
@@ -229,15 +259,15 @@
                 <a href="https://www.instagram.com/morley.ae" target="_blank" class="block glass-panel rounded-2xl p-4 sm:p-5 transition-all duration-300 hover:border-neon-blue/60 hover:shadow-glow group cursor-pointer">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform overflow-hidden">
-                                <img src="https://cdn.simpleicons.org/instagram/f59e0b" alt="Instagram" class="w-7 h-7 object-contain">
+                            <div class="w-12 h-12 rounded-xl bg-neon-blue/20 border border-neon-blue/40 flex items-center justify-center text-neon-blue group-hover:scale-110 transition-transform overflow-hidden">
+                                <img src="https://cdn.simpleicons.org/instagram/00f2fe" alt="Instagram" class="w-7 h-7 object-contain">
                             </div>
                             <div>
                                 <h3 class="font-bold text-lg text-white group-hover:text-neon-blue transition-colors">Morley.ae - Instagram</h3>
                             </div>
                         </div>
                         <div class="flex items-center space-x-3">
-                            <span class="hidden sm:inline-flex px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-400 text-xs font-semibold">
+                            <span class="hidden sm:inline-flex justify-center text-center px-3 py-1.5 rounded-xl bg-neon-blue/10 text-neon-blue text-xs font-semibold">
                                 Open Instagram
                             </span>
                         </div>
@@ -254,7 +284,7 @@
                     <h2 class="text-3xl font-extrabold text-white">Editing Presets</h2>
                     <p class="text-slate-400 text-sm">High-quality After Effects presets, twix-settings & color grades.</p>
                 </div>
-                <button type="button" onclick="switchView('home')" class="inline-flex items-center gap-2 text-xs text-slate-400 hover:text-neon-blue transition-colors"><i data-lucide="arrow-left" class="w-4 h-4"></i>Hub</button>
+                <button type="button" onclick="switchView('home')" class="inline-flex items-center gap-2 text-xs text-slate-400 hover:text-neon-blue transition-colors"><i data-lucide="arrow-left" class="w-4 h-4"></i>Links</button>
             </div>
 
             <!-- Preset Grid -->
@@ -270,7 +300,7 @@
                     <h2 class="text-3xl font-extrabold text-white">Scene Packs</h2>
                     <p class="text-slate-400 text-sm">Complete scenes and motion assets for your next edit.</p>
                 </div>
-                <button type="button" onclick="switchView('home')" class="inline-flex items-center gap-2 text-xs text-slate-400 hover:text-emerald-300 transition-colors"><i data-lucide="arrow-left" class="w-4 h-4"></i>Hub</button>
+                <button type="button" onclick="switchView('home')" class="inline-flex items-center gap-2 text-xs text-slate-400 hover:text-neon-blue transition-colors"><i data-lucide="arrow-left" class="w-4 h-4"></i>Links</button>
             </div>
             <div id="scenepackGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
         </section>
@@ -357,9 +387,9 @@
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-300 mb-1">Preview image or video</label>
-                            <input type="file" id="pMedia" accept="image/*,video/*" multiple onchange="handleMediaUpload(event)" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/80 border border-slate-700 text-slate-300 text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-neon-blue/20 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-neon-blue focus:outline-none">
-                            <p id="mediaUploadStatus" class="mt-1 text-[10px] text-slate-500">Upload several images or short videos directly. No links needed.</p>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Preview URLs from GitHub</label>
+                            <textarea id="pMediaUrls" rows="4" oninput="updateLivePreview()" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/80 border border-slate-700 text-white text-sm focus:outline-none focus:border-neon-blue transition-colors" placeholder="https://raw.githubusercontent.com/username/repository/main/previews/product-01.jpg&#10;One direct URL per line"></textarea>
+                            <p id="mediaUploadStatus" class="mt-1 text-[10px] text-slate-500">Save preview files manually in GitHub's <strong>previews</strong> folder, then paste the direct raw URL for each file above. Permanent product data is maintained in <strong>products.js</strong>.</p>
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-300 mb-1">Detailed product information</label>
@@ -377,8 +407,8 @@
                             <span class="text-[10px] bg-neon-blue/10 text-neon-blue px-2 py-0.5 rounded border border-neon-blue/30">Before publishing</span>
                         </h4>
                         <div id="livePreviewCard" class="glass-panel rounded-2xl overflow-hidden border border-neon-border/40 transition-all duration-300 flex flex-col group opacity-80 pointer-events-none">
-                            <div class="relative h-44 overflow-hidden bg-slate-900">
-                                <img id="prevImage" src="https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=800&q=80" alt="Preview" class="w-full h-full object-cover">
+                            <div class="relative aspect-square overflow-hidden bg-slate-900">
+                                <img id="prevImage" src="https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=800&q=80" alt="Preview" class="w-full h-full object-contain">
                                 <div id="prevPriceTag" class="absolute top-3 right-3 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-neon-blue/30 text-neon-blue text-xs font-bold shadow-glow">
                                     $9.99
                                 </div>
@@ -413,7 +443,8 @@
         <p>&copy; 2026 EndlessAudios™ & Morley.ae. All rights reserved.</p>
     </footer>
 
-    <!-- JavaScript Application Logic -->
+    <!-- Permanent catalog data, then JavaScript application logic -->
+    <script src="products.js"></script>
     <script>
         // Initialize Lucide Icons
         lucide.createIcons();
@@ -428,6 +459,7 @@
                 const navScenepacksBtn = document.getElementById('navScenepacksBtn');
                 const scenepacksView = document.getElementById('scenepacksView');
                 const productDetailView = document.getElementById('productDetailView');
+            let activeView;
 
             homeView.classList.add('hidden');
             presetsView.classList.add('hidden');
@@ -441,25 +473,34 @@
 
             if (view === 'home') {
                 homeView.classList.remove('hidden');
+                activeView = homeView;
                 navHomeBtn.className = "px-5 py-2 rounded-xl text-xs font-bold transition-all duration-300 bg-neon-blue/10 text-neon-blue border border-neon-blue/30 shadow-glow";
                 window.history.pushState({}, '', '#home');
             } else if (view === 'presets') {
                 presetsView.classList.remove('hidden');
+                activeView = presetsView;
                 navPresetsBtn.className = "px-5 py-2 rounded-xl text-xs font-bold transition-all duration-300 bg-neon-blue/10 text-neon-blue border border-neon-blue/30 shadow-glow";
                 window.history.pushState({}, '', '#presets');
                 renderPresets();
             } else if (view === 'scenepacks') {
                 scenepacksView.classList.remove('hidden');
-                navScenepacksBtn.className = "px-5 py-2 rounded-xl text-xs font-bold transition-all duration-300 bg-emerald-400/10 text-emerald-300 border border-emerald-400/30 shadow-glow";
+                activeView = scenepacksView;
+                navScenepacksBtn.className = "px-5 py-2 rounded-xl text-xs font-bold transition-all duration-300 bg-neon-blue/10 text-neon-blue border border-neon-blue/30 shadow-glow";
                 window.history.pushState({}, '', '#scenepacks');
                 renderProducts('scenepack');
             } else if (view === 'product') {
                 productDetailView.classList.remove('hidden');
+                activeView = productDetailView;
                 renderProductDetail(window.location.hash.split('/')[1]);
             } else if (view === 'login') {
                 loginView.classList.remove('hidden');
+                activeView = loginView;
                 window.history.pushState({}, '', '#login');
                 checkAuthStatus();
+            }
+            if (activeView) {
+                activeView.classList.remove('view-enter');
+                requestAnimationFrame(() => activeView.classList.add('view-enter'));
             }
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -568,37 +609,19 @@
             }
         }
 
-        // Default Presets Data
-        const defaultPresets = [
-            {
-                id: 1,
-                title: "Ultimate Transition & Twitch Pack",
-                desc: "Includes over 30+ seamless After Effects transitions, sound design elements, and shake presets.",
-                price: "$14.99",
-                image: "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=800&q=80",
-                payhip: "https://payhip.com"
-            },
-            {
-                id: 2,
-                title: "Cinematic Grade & Glow LUTs",
-                desc: "Give your edits a professional Hollywood look with precisely tuned color gradings.",
-                price: "$9.99",
-                image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80",
-                payhip: "https://payhip.com"
-            }
-        ];
-
         function getStoredPresets() {
-            const saved = localStorage.getItem('endless_presets');
-            if (!saved) {
-                localStorage.setItem('endless_presets', JSON.stringify(defaultPresets));
-                return defaultPresets;
-            }
-            return JSON.parse(saved);
+            return window.PRODUCTS_DATA || [];
         }
 
         function getProductMedia(product) {
             return product.media && product.media.length ? product.media : [{ type: 'image', src: product.image }];
+        }
+
+        function mediaFromUrls(value) {
+            return value.split('\n').map(url => url.trim()).filter(Boolean).map(url => ({
+                type: /\.(mp4|webm|mov)(\?.*)?$/i.test(url) ? 'video' : 'image',
+                src: url
+            }));
         }
 
         function renderProducts(type) {
@@ -610,9 +633,9 @@
 
         function productCard(p) {
             const media = getProductMedia(p)[0];
-            const preview = media.type === 'video' ? `<video src="${media.src}" class="w-full h-full object-cover" muted></video>` : `<img src="${media.src}" alt="${p.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">`;
+            const preview = media.type === 'video' ? `<video src="${media.src}" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700" muted></video>` : `<img src="${media.src}" alt="${p.title}" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700">`;
             return `<article onclick="openProduct(${p.id})" class="glass-panel rounded-2xl overflow-hidden border border-neon-border/40 hover:border-neon-blue/60 hover:shadow-glow transition-all duration-300 flex flex-col group cursor-pointer">
-                <div class="relative h-48 overflow-hidden bg-slate-900">${preview}<div class="absolute top-3 right-3 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-neon-blue/30 text-neon-blue text-xs font-bold shadow-glow">${p.price}</div><div class="absolute bottom-3 left-3 px-2 py-1 rounded-lg bg-black/60 text-[10px] text-slate-200">${getProductMedia(p).length} previews</div></div>
+                <div class="relative aspect-square overflow-hidden bg-slate-900">${preview}<div class="absolute top-3 right-3 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-neon-blue/30 text-neon-blue text-xs font-bold shadow-glow">${p.price}</div><div class="absolute bottom-3 left-3 px-2 py-1 rounded-lg bg-black/60 text-[10px] text-slate-200">${getProductMedia(p).length} previews</div></div>
                 <div class="p-5 flex flex-col flex-grow space-y-3"><h3 class="font-bold text-lg text-white group-hover:text-neon-blue transition-colors">${p.title}</h3><p class="text-xs text-slate-400 flex-grow leading-relaxed">${p.desc}</p><div class="pt-2 w-full py-2.5 rounded-xl bg-gradient-to-r from-neon-blue to-neon-light text-black text-xs font-bold text-center"><i data-lucide="arrow-up-right" class="w-4 h-4 inline-block align-middle mr-1"></i>View product</div></div>
             </article>`;
         }
@@ -635,17 +658,9 @@
             const product = getStoredPresets().find(item => String(item.id) === String(id));
             const container = document.getElementById('productDetailContent');
             if (!product) { container.innerHTML = '<p class="text-slate-400">Product not found.</p>'; return; }
-            const media = getProductMedia(product).map(item => item.type === 'video' ? `<video src="${item.src}" controls class="w-full aspect-video object-cover rounded-xl bg-black"></video>` : `<img src="${item.src}" alt="${product.title}" class="w-full aspect-video object-cover rounded-xl bg-slate-900">`).join('');
+            const media = getProductMedia(product).map(item => item.type === 'video' ? `<video src="${item.src}" controls class="w-full aspect-square object-contain rounded-xl bg-black"></video>` : `<img src="${item.src}" alt="${product.title}" class="w-full aspect-square object-contain rounded-xl bg-slate-900">`).join('');
             container.innerHTML = `<div class="glass-panel rounded-2xl p-5 sm:p-8 border border-neon-blue/30 shadow-glow-lg space-y-6"><div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4"><div><span class="text-[10px] uppercase tracking-widest text-neon-blue">${product.type === 'scenepack' ? 'Scene Pack' : 'Editing Preset'}</span><h2 class="text-3xl font-extrabold text-white mt-2">${product.title}</h2><p class="text-slate-400 mt-2">${product.desc}</p></div><span class="text-2xl font-bold text-neon-blue">${product.price}</span></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4">${media}</div><div class="border-t border-slate-800 pt-5"><h3 class="font-bold text-white mb-2">Product information</h3><p class="text-sm leading-relaxed text-slate-300 whitespace-pre-line">${product.details || product.desc}</p></div><a href="${product.payhip}" target="_blank" class="w-full py-3 rounded-xl bg-gradient-to-r from-neon-blue to-neon-light text-black text-sm font-bold shadow-glow hover:opacity-90 transition-all flex items-center justify-center gap-2"><i data-lucide="shopping-cart" class="w-4 h-4"></i>Buy now · ${product.price}</a></div>`;
             lucide.createIcons();
-        }
-
-        function handleMediaUpload(event) {
-            const files = Array.from(event.target.files);
-            const status = document.getElementById('mediaUploadStatus');
-            if (!files.length) return;
-            if (files.some(file => file.size > 8 * 1024 * 1024)) { status.textContent = 'Each file must be smaller than 8 MB.'; event.target.value = ''; return; }
-            window.pendingMedia = Promise.all(files.map(file => new Promise(resolve => { const reader = new FileReader(); reader.onload = () => resolve({ type: file.type.startsWith('video/') ? 'video' : 'image', src: reader.result }); reader.readAsDataURL(file); }))).then(media => { window.pendingMediaData = media; status.textContent = `${media.length} preview file(s) ready.`; updateLivePreview(media[0].src); return media; });
         }
 
         // Live Preview Update function
@@ -653,7 +668,7 @@
             const title = document.getElementById('pTitle').value || 'Product Title';
             const desc = document.getElementById('pDesc').value || 'Product description will appear here...';
             const price = document.getElementById('pPrice').value || '$9.99';
-            const image = (window.pendingMediaData && window.pendingMediaData[0] ? window.pendingMediaData[0].src : 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=800&q=80');
+            const image = (mediaFromUrls(document.getElementById('pMediaUrls').value)[0] || {}).src || 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=800&q=80';
 
             document.getElementById('prevTitle').textContent = title;
             document.getElementById('prevDesc').textContent = desc;
@@ -701,7 +716,7 @@
             document.getElementById('pPayhip').value = product.payhip;
             document.getElementById('pType').value = product.type || 'preset';
             document.getElementById('pDetails').value = product.details || '';
-            window.pendingMediaData = product.media || [{ type: 'image', src: product.image }];
+            document.getElementById('pMediaUrls').value = (product.media || [{ type: 'image', src: product.image }]).map(media => media.src).join('\n');
 
             document.getElementById('formTitleText').textContent = "Edit Product";
             document.getElementById('savePresetBtn').textContent = "Save Changes";
@@ -718,8 +733,8 @@
             document.getElementById('formTitleText').textContent = "Add New Product";
             document.getElementById('savePresetBtn').textContent = "Publish Product";
             document.getElementById('cancelEditBtn').classList.add('hidden');
-            window.pendingMediaData = [];
-            document.getElementById('mediaUploadStatus').textContent = 'Upload several images or short videos directly. No links needed.';
+            document.getElementById('pMediaUrls').value = '';
+            document.getElementById('mediaUploadStatus').textContent = "Save preview files manually in GitHub's previews folder, then paste the direct raw URL for each file above.";
             updateLivePreview();
         }
 
@@ -728,7 +743,6 @@
             if (!confirm('Are you sure you want to delete this product?')) return;
             let presets = getStoredPresets();
             presets = presets.filter(p => p.id !== id);
-            localStorage.setItem('endless_presets', JSON.stringify(presets));
             renderAdminProductList();
         }
 
@@ -737,14 +751,16 @@
             e.preventDefault();
             const editingId = document.getElementById('pEditingId').value;
             let presets = getStoredPresets();
+            const media = mediaFromUrls(document.getElementById('pMediaUrls').value);
+            if (!media.length) return;
 
             const productData = {
                 id: editingId ? Number(editingId) : Date.now(),
                 title: document.getElementById('pTitle').value,
                 desc: document.getElementById('pDesc').value,
                 price: document.getElementById('pPrice').value,
-                image: window.pendingMediaData && window.pendingMediaData[0] ? window.pendingMediaData[0].src : 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=800&q=80',
-                media: window.pendingMediaData || [],
+                image: media[0].src,
+                media,
                 details: document.getElementById('pDetails').value,
                 type: document.getElementById('pType').value,
                 payhip: document.getElementById('pPayhip').value
@@ -758,14 +774,12 @@
                 alert('Product successfully published!');
             }
 
-            localStorage.setItem('endless_presets', JSON.stringify(presets));
             resetPresetForm();
             renderAdminProductList();
             if (productData.type === 'scenepack') renderProducts('scenepack'); else renderProducts('preset');
         }
 
         // Initialize on load
-        window.pendingMediaData = [];
         handleUrlRoute();
     </script>
 </body>
