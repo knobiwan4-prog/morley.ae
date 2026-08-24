@@ -621,15 +621,7 @@
         }
 
         function getStoredPresets() {
-            const saved = localStorage.getItem('endless_product_catalog');
-            if (saved) {
-                try {
-                    return JSON.parse(saved);
-                } catch (error) {
-                    localStorage.removeItem('endless_product_catalog');
-                }
-            }
-            return JSON.parse(JSON.stringify(window.PRODUCTS_DATA || []));
+            return window.PRODUCTS_DATA || [];
         }
 
         function saveProductCatalog(products) {
