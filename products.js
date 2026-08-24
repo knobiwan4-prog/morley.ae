@@ -1,5 +1,17 @@
 /* Permanent product catalog. Edit with admin.html, then commit this file to GitHub. */
 window.SCENEPACK_DOWNLOAD_PASSWORD = "ENDLESSAUDIOS";
+window.PRODUCT_CATEGORIES = {
+    "preset": [
+        "Packs",
+        "CCs",
+        "Outros"
+    ],
+    "scenepack": [
+        "Bellamy Blake",
+        "Clarke Griffin",
+        "The 100"
+    ]
+};
 window.PRODUCTS_DATA = [
     {
         "id": 1787559098245,
@@ -13,6 +25,7 @@ window.PRODUCTS_DATA = [
                 "src": "https://knobiwan4-prog.github.io/morley.ae/previews/bellamy%20s1%20best%20scenes.jpg"
             }
         ],
+        "categories": [],
         "details": "more details",
         "type": "scenepack",
         "payhip": "https://payhip.com"
@@ -29,9 +42,9 @@ window.PRODUCTS_DATA = [
                 "src": "https://knobiwan4-prog.github.io/morley.ae/previews/bellamy%20s1%20best%20scenes.jpg"
             }
         ],
+        "categories": [],
         "details": "details here",
         "type": "preset",
         "payhip": "https://payhip.com"
     }
 ];
- 

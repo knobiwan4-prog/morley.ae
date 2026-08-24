@@ -34,6 +34,17 @@
         <div class="stack">
             <section class="panel"><div class="actions" style="justify-content:space-between"><h2>Products and Scenepacks</h2><button id="newButton" class="secondary" type="button">New product</button></div><div id="productList" class="product-list"></div></section>
             <section class="panel">
+                <h2>Manage categories</h2>
+                <p class="muted">Preset and Scenepack categories are separate. Add or remove them here.</p>
+                <div class="grid">
+                    <label>Category type<select id="categoryType"><option value="preset">Preset category</option><option value="scenepack">Scenepack category</option></select></label>
+                    <label>New category<input id="categoryName" placeholder="e.g. Transitions"></label>
+                </div>
+                <div class="actions" style="margin-top:12px"><button id="addCategoryButton" class="primary" type="button">Add category</button></div>
+                <p id="categoryStatus" class="status"></p>
+                <div id="categoryList" class="product-list"></div>
+            </section>
+            <section class="panel">
                 <h2 id="formTitle">New product</h2>
                 <form id="productForm" class="stack">
                     <input id="productId" type="hidden">
@@ -41,6 +52,7 @@
                         <label>Type<select id="type"><option value="preset">Editing Preset</option><option value="scenepack">Scenepack</option></select></label>
                         <label>Title<input id="title" required></label>
                     </div>
+                    <label>Categories<select id="categories" multiple size="4"></select></label>
                     <label>Description<textarea id="desc" required></textarea></label>
                     <div class="grid"><label>Price / label<input id="price" placeholder="$9.99" required></label><label>Payhip URL<input id="payhip" type="url" required placeholder="https://payhip.com/..." ></label></div>
                     <label>Preview URLs<textarea id="media" required placeholder="One GitHub raw URL per line"></textarea></label>
@@ -56,30 +68,69 @@
 <script src="products.js"></script>
 <script>
     const CATALOG_KEY = 'morley_admin_catalog';
+    const CATEGORY_KEY = 'morley_admin_categories';
     const PASSWORD_KEY = 'morley_download_password';
     let products = [];
+    let categories = { preset: [], scenepack: [] };
 
     const $ = id => document.getElementById(id);
     const clone = value => JSON.parse(JSON.stringify(value));
-    const mediaFromText = value => value.split('\n').map(url => url.trim()).filter(Boolean).map(src => ({ type: /\\.(mp4|webm|mov)(\\?.*)?$/i.test(src) ? 'video' : 'image', src }));
+    const mediaFromText = value => value.split('\n').map(url => url.trim()).filter(Boolean).map(src => ({ type: /\.(mp4|webm|mov)(\?.*)?$/i.test(src) ? 'video' : 'image', src }));
     const textFromMedia = media => (media || []).map(item => item.src).join('\n');
 
     function loadCatalog() {
         const saved = localStorage.getItem(CATALOG_KEY);
         products = saved ? JSON.parse(saved) : clone(window.PRODUCTS_DATA || []);
+        const savedCategories = localStorage.getItem(CATEGORY_KEY);
+        categories = savedCategories ? JSON.parse(savedCategories) : clone(window.PRODUCT_CATEGORIES || { preset: [], scenepack: [] });
+        categories.preset = Array.isArray(categories.preset) ? categories.preset : [];
+        categories.scenepack = Array.isArray(categories.scenepack) ? categories.scenepack : [];
     }
 
     function persistCatalog() { localStorage.setItem(CATALOG_KEY, JSON.stringify(products)); }
 
+    function persistCategories() { localStorage.setItem(CATEGORY_KEY, JSON.stringify(categories)); }
+
     function renderList() {
-        $('productList').innerHTML = products.length ? products.map(product => `<div class="product-row"><div><strong>${escapeHtml(product.title)}</strong><small>${product.type === 'scenepack' ? 'Scenepack' : 'Preset'} · ${escapeHtml(product.price)}</small></div><div class="actions"><button class="secondary edit" data-id="${product.id}" type="button">Edit</button><button class="danger delete" data-id="${product.id}" type="button">Delete</button></div></div>`).join('') : '<p class="muted">No products yet.</p>';
+        $('productList').innerHTML = products.length ? products.map(product => `<div class="product-row"><div><strong>${escapeHtml(product.title)}</strong><small>${product.type === 'scenepack' ? 'Scenepack' : 'Preset'} · ${escapeHtml(product.price)} · ${(product.categories || []).map(escapeHtml).join(', ') || 'No category'}</small></div><div class="actions"><button class="secondary edit" data-id="${product.id}" type="button">Edit</button><button class="danger delete" data-id="${product.id}" type="button">Delete</button></div></div>`).join('') : '<p class="muted">No products yet.</p>';
         document.querySelectorAll('.edit').forEach(button => button.onclick = () => editProduct(Number(button.dataset.id)));
         document.querySelectorAll('.delete').forEach(button => button.onclick = () => deleteProduct(Number(button.dataset.id)));
+        renderCategoryList();
+        renderCategorySelect();
+    }
+
+    function renderCategoryList() {
+        $('categoryList').innerHTML = ['preset', 'scenepack'].map(type => `<div><h3>${type === 'preset' ? 'Preset categories' : 'Scenepack categories'}</h3><div class="actions">${categories[type].map(category => `<span class="product-row" style="padding:7px 10px"><small>${escapeHtml(category)}</small><button class="danger remove-category" data-type="${type}" data-category="${escapeHtml(category)}" type="button">Remove</button></span>`).join('') || '<small class="muted">None yet.</small>'}</div></div>`).join('');
+        document.querySelectorAll('.remove-category').forEach(button => button.onclick = () => removeCategory(button.dataset.type, button.dataset.category));
+    }
+
+    function renderCategorySelect() {
+        const type = $('type').value;
+        $('categories').innerHTML = categories[type].map(category => `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`).join('');
+    }
+
+    function addCategory() {
+        const type = $('categoryType').value;
+        const name = $('categoryName').value.trim();
+        if (!name) return;
+        if (!categories[type].includes(name)) categories[type].push(name);
+        $('categoryName').value = '';
+        persistCategories();
+        renderList();
+        $('categoryStatus').textContent = 'Category saved locally. Download products.js to publish it.';
+    }
+
+    function removeCategory(type, name) {
+        categories[type] = categories[type].filter(category => category !== name);
+        products.forEach(product => { if (product.type === type) product.categories = (product.categories || []).filter(category => category !== name); });
+        persistCategories();
+        persistCatalog();
+        renderList();
     }
 
     function editProduct(id) {
         const product = products.find(item => item.id === id); if (!product) return;
-        $('productId').value = product.id; $('type').value = product.type || 'preset'; $('title').value = product.title; $('desc').value = product.desc; $('price').value = product.price; $('payhip').value = product.payhip; $('media').value = textFromMedia(product.media || [{ src: product.image }]); $('details').value = product.details || ''; $('formTitle').textContent = 'Edit product'; window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        $('productId').value = product.id; $('type').value = product.type || 'preset'; renderCategorySelect(); Array.from($('categories').options).forEach(option => { option.selected = (product.categories || []).includes(option.value); }); $('title').value = product.title; $('desc').value = product.desc; $('price').value = product.price; $('payhip').value = product.payhip; $('media').value = textFromMedia(product.media || [{ src: product.image }]); $('details').value = product.details || ''; $('formTitle').textContent = 'Edit product'; window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
 
     function resetForm() { $('productForm').reset(); $('productId').value = ''; $('formTitle').textContent = 'New product'; $('formStatus').textContent = ''; }
@@ -88,7 +139,7 @@
         event.preventDefault();
         const media = mediaFromText($('media').value); if (!media.length) { $('formStatus').textContent = 'Add at least one preview URL.'; return; }
         const id = $('productId').value ? Number($('productId').value) : Date.now();
-        const product = { id, title: $('title').value.trim(), desc: $('desc').value.trim(), price: $('price').value.trim(), image: media[0].src, media, details: $('details').value.trim(), type: $('type').value, payhip: $('payhip').value.trim() };
+        const product = { id, title: $('title').value.trim(), desc: $('desc').value.trim(), price: $('price').value.trim(), image: media[0].src, media, categories: Array.from($('categories').selectedOptions).map(option => option.value), details: $('details').value.trim(), type: $('type').value, payhip: $('payhip').value.trim() };
         const index = products.findIndex(item => item.id === id); if (index === -1) products.unshift(product); else products[index] = product;
         persistCatalog(); renderList(); resetForm(); $('formStatus').textContent = 'Saved locally. Download products.js to publish it.';
     }
@@ -99,12 +150,12 @@
 
     function downloadCatalog() {
         const password = localStorage.getItem(PASSWORD_KEY) || window.SCENEPACK_DOWNLOAD_PASSWORD || 'CHANGE_THIS_PASSWORD';
-        const output = `/* Permanent product catalog. Edit with admin.html, then commit this file to GitHub. */\nwindow.SCENEPACK_DOWNLOAD_PASSWORD = ${JSON.stringify(password)};\nwindow.PRODUCTS_DATA = ${JSON.stringify(products, null, 4)};\n`;
+        const output = `/* Permanent product catalog. Edit with admin.html, then commit this file to GitHub. */\nwindow.SCENEPACK_DOWNLOAD_PASSWORD = ${JSON.stringify(password)};\nwindow.PRODUCT_CATEGORIES = ${JSON.stringify(categories, null, 4)};\nwindow.PRODUCTS_DATA = ${JSON.stringify(products, null, 4)};\n`;
         const link = document.createElement('a'); link.href = URL.createObjectURL(new Blob([output], { type: 'text/javascript' })); link.download = 'products.js'; link.click(); URL.revokeObjectURL(link.href); $('saveStatus').textContent = 'products.js downloaded. Replace the repository file and push it to GitHub.';
     }
 
-    $('productForm').onsubmit = saveProduct; $('newButton').onclick = resetForm; $('cancelButton').onclick = resetForm; $('downloadButton').onclick = downloadCatalog;
-    $('resetButton').onclick = () => { if (!confirm('Discard local catalog changes and reload products.js?')) return; localStorage.removeItem(CATALOG_KEY); loadCatalog(); renderList(); resetForm(); $('saveStatus').textContent = 'Local changes reset.'; };
+    $('productForm').onsubmit = saveProduct; $('newButton').onclick = resetForm; $('cancelButton').onclick = resetForm; $('downloadButton').onclick = downloadCatalog; $('addCategoryButton').onclick = addCategory; $('type').onchange = renderCategorySelect;
+    $('resetButton').onclick = () => { if (!confirm('Discard local catalog changes and reload products.js?')) return; localStorage.removeItem(CATALOG_KEY); localStorage.removeItem(CATEGORY_KEY); loadCatalog(); renderList(); resetForm(); $('saveStatus').textContent = 'Local changes reset.'; };
     loadCatalog(); renderList(); resetForm();
 </script>
 </body>

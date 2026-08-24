@@ -281,7 +281,7 @@
                 <button type="button" onclick="switchView('home')" class="inline-flex items-center gap-2 text-xs text-slate-400 hover:text-neon-blue transition-colors"><i data-lucide="arrow-left" class="w-4 h-4"></i>Links</button>
             </div>
 
-            <!-- Preset Grid -->
+            <div id="presetCategories" class="flex flex-wrap justify-center gap-2" aria-label="Preset categories"></div>
             <div id="presetGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Dynamically populated via JS -->
             </div>
@@ -296,6 +296,7 @@
                 </div>
                 <button type="button" onclick="switchView('home')" class="inline-flex items-center gap-2 text-xs text-slate-400 hover:text-neon-blue transition-colors"><i data-lucide="arrow-left" class="w-4 h-4"></i>Links</button>
             </div>
+            <div id="scenepackCategories" class="flex flex-wrap justify-center gap-2" aria-label="Scenepack categories"></div>
             <div id="scenepackGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
         </section>
 
@@ -624,6 +625,15 @@
             return window.PRODUCTS_DATA || [];
         }
 
+        function getProductCategories(type) {
+            const categories = window.PRODUCT_CATEGORIES || {};
+            return Array.isArray(categories[type]) ? categories[type] : [];
+        }
+
+        function getAssignedCategories(product) {
+            return Array.isArray(product.categories) ? product.categories : [];
+        }
+
         function saveProductCatalog(products) {
             window.PRODUCTS_DATA = products;
             localStorage.setItem('endless_product_catalog', JSON.stringify(products));
@@ -640,9 +650,31 @@
             }));
         }
 
+        function renderCategoryFilters(type, activeCategory = 'all') {
+            const container = document.getElementById(type === 'preset' ? 'presetCategories' : 'scenepackCategories');
+            if (!container) return;
+            const buttons = ['all', ...getProductCategories(type)].map(category => {
+                const label = category === 'all' ? 'All' : category;
+                const active = category === activeCategory;
+                return `<button type="button" onclick="setProductCategory('${type}', ${JSON.stringify(category)})" class="rounded-xl border px-4 py-2 text-xs font-semibold transition-colors ${active ? 'border-neon-blue/60 bg-neon-blue/15 text-neon-blue' : 'border-slate-800 bg-white/5 text-slate-300 hover:border-neon-blue/40 hover:text-white'}">${label}</button>`;
+            }).join('');
+            container.innerHTML = buttons;
+        }
+
+        function setProductCategory(type, category) {
+            window.activeProductCategory = window.activeProductCategory || {};
+            window.activeProductCategory[type] = category;
+            renderProducts(type);
+        }
+
         function renderProducts(type) {
             const grid = document.getElementById(type === 'preset' ? 'presetGrid' : 'scenepackGrid');
-            const products = getStoredPresets().filter(product => (product.type || 'preset') === type);
+            const activeCategory = (window.activeProductCategory && window.activeProductCategory[type]) || 'all';
+            const products = getStoredPresets().filter(product => {
+                if ((product.type || 'preset') !== type) return false;
+                return activeCategory === 'all' || getAssignedCategories(product).includes(activeCategory);
+            });
+            renderCategoryFilters(type, activeCategory);
             grid.innerHTML = products.length ? products.map(productCard).join('') : `<div class="md:col-span-2 glass-panel rounded-2xl p-8 text-center text-sm text-slate-500">No ${type === 'preset' ? 'presets' : 'scenepacks'} published yet.</div>`;
             lucide.createIcons();
         }
