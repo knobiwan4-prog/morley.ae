@@ -6,11 +6,19 @@ window.PRODUCT_CATEGORIES = {
         "CCs",
         "Outros"
     ],
-    "scenepack": [
-        "Bellamy Blake",
-        "Clarke Griffin",
-        "The 100"
-    ]
+    "scenepack": {
+        "movieShow": [
+            "The 100",
+            "Hunger Games",
+            "The Rookie"
+        ],
+        "characterActor": [
+            "Bellamy Blake",
+            "Clarke Griffin",
+            "Octavie Blake",
+            "John Murphy"
+        ]
+    }
 };
 window.PRODUCTS_DATA = [
     {
@@ -26,6 +34,15 @@ window.PRODUCTS_DATA = [
             }
         ],
         "categories": [],
+        "presetCategories": [],
+        "movieShows": [
+            "The 100"
+        ],
+        "characters": [
+            "Bellamy Blake",
+            "Clarke Griffin",
+            "Octavie Blake"
+        ],
         "details": "more details",
         "type": "scenepack",
         "payhip": "https://payhip.com"
@@ -43,6 +60,11 @@ window.PRODUCTS_DATA = [
             }
         ],
         "categories": [],
+        "presetCategories": [
+            "Packs"
+        ],
+        "movieShows": [],
+        "characters": [],
         "details": "details here",
         "type": "preset",
         "payhip": "https://payhip.com"

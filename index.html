@@ -296,7 +296,7 @@
                 </div>
                 <button type="button" onclick="switchView('home')" class="inline-flex items-center gap-2 text-xs text-slate-400 hover:text-neon-blue transition-colors"><i data-lucide="arrow-left" class="w-4 h-4"></i>Links</button>
             </div>
-            <div id="scenepackCategories" class="flex flex-wrap justify-center gap-2" aria-label="Scenepack categories"></div>
+            <div id="scenepackCategories" class="space-y-3" aria-label="Scenepack categories"></div>
             <div id="scenepackGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
         </section>
 
@@ -627,11 +627,23 @@
 
         function getProductCategories(type) {
             const categories = window.PRODUCT_CATEGORIES || {};
+            if (type === 'scenepack') {
+                if (Array.isArray(categories.scenepack)) return { movieShow: categories.scenepack, characterActor: [] };
+                return categories.scenepack || {};
+            }
             return Array.isArray(categories[type]) ? categories[type] : [];
         }
 
         function getAssignedCategories(product) {
             return Array.isArray(product.categories) ? product.categories : [];
+        }
+
+        function getAssignedPresetCategories(product) {
+            return Array.isArray(product.presetCategories) ? product.presetCategories : getAssignedCategories(product);
+        }
+
+        function getAssignedSceneCategories(product, group) {
+            return Array.isArray(product[group]) ? product[group] : getAssignedCategories(product);
         }
 
         function saveProductCatalog(products) {
@@ -653,26 +665,54 @@
         function renderCategoryFilters(type, activeCategory = 'all') {
             const container = document.getElementById(type === 'preset' ? 'presetCategories' : 'scenepackCategories');
             if (!container) return;
-            const buttons = ['all', ...getProductCategories(type)].map(category => {
-                const label = category === 'all' ? 'All' : category;
+            if (type === 'preset') {
+                container.innerHTML = categoryButtons(type, getProductCategories(type), activeCategory);
+                return;
+            }
+            const sceneCategories = getProductCategories(type);
+            const sceneState = activeCategory || { movieShow: 'all', characterActor: 'all' };
+            container.innerHTML = `<div class="grid grid-cols-1 gap-3 sm:grid-cols-2"><label class="text-xs font-bold uppercase tracking-wider text-slate-400">Movie / Show<select onchange="setProductCategory('scenepack-movieShow', this.value)" class="mt-2 w-full rounded-xl border border-slate-800 bg-white/5 px-4 py-2.5 text-xs font-semibold normal-case tracking-normal text-slate-200 focus:border-neon-blue focus:outline-none">${categoryOptions(sceneCategories.movieShow || [], sceneState.movieShow || 'all')}</select></label><label class="text-xs font-bold uppercase tracking-wider text-slate-400">Character / Actor<select onchange="setProductCategory('scenepack-characterActor', this.value)" class="mt-2 w-full rounded-xl border border-slate-800 bg-white/5 px-4 py-2.5 text-xs font-semibold normal-case tracking-normal text-slate-200 focus:border-neon-blue focus:outline-none">${categoryOptions(sceneCategories.characterActor || [], sceneState.characterActor || 'all')}</select></label></div>`;
+        }
+
+        function categoryOptions(categories, activeCategory) {
+            return ['all', ...categories].map(category => `<option value="${escapeHtml(category)}"${category === activeCategory ? ' selected' : ''}>${category === 'all' ? 'All' : escapeHtml(category)}</option>`).join('');
+        }
+
+        function escapeHtml(value) {
+            return String(value).replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[character]));
+        }
+
+        function categoryButtons(type, categories, activeCategory) {
+            return ['all', ...categories].map(category => {
                 const active = category === activeCategory;
-                return `<button type="button" onclick="setProductCategory('${type}', ${JSON.stringify(category)})" class="rounded-xl border px-4 py-2 text-xs font-semibold transition-colors ${active ? 'border-neon-blue/60 bg-neon-blue/15 text-neon-blue' : 'border-slate-800 bg-white/5 text-slate-300 hover:border-neon-blue/40 hover:text-white'}">${label}</button>`;
+                return `<button type="button" onclick="setProductCategory('${type}', ${JSON.stringify(category)})" class="rounded-xl border px-4 py-2 text-xs font-semibold transition-colors ${active ? 'border-neon-blue/60 bg-neon-blue/15 text-neon-blue' : 'border-slate-800 bg-white/5 text-slate-300 hover:border-neon-blue/40 hover:text-white'}">${category === 'all' ? 'All' : category}</button>`;
             }).join('');
-            container.innerHTML = buttons;
         }
 
         function setProductCategory(type, category) {
             window.activeProductCategory = window.activeProductCategory || {};
+            if (type === 'scenepack-movieShow' || type === 'scenepack-characterActor') {
+                const group = type.replace('scenepack-', '');
+                window.activeProductCategory.scenepack = window.activeProductCategory.scenepack || { movieShow: 'all', characterActor: 'all' };
+                window.activeProductCategory.scenepack[group] = category;
+                renderProducts('scenepack');
+                return;
+            }
             window.activeProductCategory[type] = category;
             renderProducts(type);
         }
 
         function renderProducts(type) {
             const grid = document.getElementById(type === 'preset' ? 'presetGrid' : 'scenepackGrid');
-            const activeCategory = (window.activeProductCategory && window.activeProductCategory[type]) || 'all';
+            window.activeProductCategory = window.activeProductCategory || {};
+            if (type === 'scenepack' && typeof window.activeProductCategory.scenepack !== 'object') window.activeProductCategory.scenepack = { movieShow: 'all', characterActor: 'all' };
+            const activeCategory = (window.activeProductCategory && window.activeProductCategory[type]) || (type === 'scenepack' ? { movieShow: 'all', characterActor: 'all' } : 'all');
             const products = getStoredPresets().filter(product => {
                 if ((product.type || 'preset') !== type) return false;
-                return activeCategory === 'all' || getAssignedCategories(product).includes(activeCategory);
+                if (type === 'preset') return activeCategory === 'all' || getAssignedPresetCategories(product).includes(activeCategory);
+                const movieShowMatches = activeCategory.movieShow === 'all' || getAssignedSceneCategories(product, 'movieShows').includes(activeCategory.movieShow);
+                const characterMatches = activeCategory.characterActor === 'all' || getAssignedSceneCategories(product, 'characters').includes(activeCategory.characterActor);
+                return movieShowMatches && characterMatches;
             });
             renderCategoryFilters(type, activeCategory);
             grid.innerHTML = products.length ? products.map(productCard).join('') : `<div class="md:col-span-2 glass-panel rounded-2xl p-8 text-center text-sm text-slate-500">No ${type === 'preset' ? 'presets' : 'scenepacks'} published yet.</div>`;
