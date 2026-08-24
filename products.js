@@ -63,9 +63,11 @@ window.PRODUCTS_DATA = [
         "presetCategories": [
             "Packs"
         ],
-        "previewVideos": [],
         "movieShows": [],
         "characters": [],
+        "previewVideos": [
+            "https://streamable.com/x2cwpz"
+        ],
         "details": "details here",
         "type": "preset",
         "payhip": "https://payhip.com"
