@@ -57,6 +57,10 @@ window.PRODUCTS_DATA = [
             {
                 "type": "image",
                 "src": "https://knobiwan4-prog.github.io/morley.ae/previews/bellamy%20s1%20best%20scenes.jpg"
+            },
+            {
+                "type": "image",
+                "src": "https://knobiwan4-prog.github.io/morley.ae/previews/bellamy%20s1%20best%20scenes.jpg"
             }
         ],
         "categories": [],
