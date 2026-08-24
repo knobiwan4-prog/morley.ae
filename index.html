@@ -46,14 +46,14 @@
             pointer-events: none;
             z-index: 0;
             opacity: 0.55;
-            filter: none;
+            filter: blur(30px);
             background: conic-gradient(from 120deg at 30% 40%, rgba(0, 242, 254, 0.16), transparent 32%, rgba(79, 172, 254, 0.1) 58%, transparent 78%);
-            animation: none;
+            animation: ambient-drift 26s ease-in-out infinite alternate;
         }
         body::after {
             opacity: 0.3;
             background: radial-gradient(circle at 70% 20%, rgba(0, 242, 254, 0.2), transparent 30%), radial-gradient(circle at 20% 80%, rgba(79, 172, 254, 0.12), transparent 28%);
-            animation: none;
+            animation: ambient-drift-reverse 34s ease-in-out infinite alternate;
         }
         main, footer { position: relative; z-index: 1; }
         ::-webkit-scrollbar {
@@ -78,6 +78,22 @@
         @keyframes float {
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-8px); }
+        }
+        @keyframes ambient-drift {
+            0% { transform: translate3d(-4%, -2%, 0) rotate(0deg) scale(1); }
+            50% { transform: translate3d(3%, 4%, 0) rotate(8deg) scale(1.08); }
+            100% { transform: translate3d(-2%, 1%, 0) rotate(-5deg) scale(1.03); }
+        }
+        @keyframes ambient-drift-reverse {
+            0% { transform: translate3d(3%, 2%, 0) scale(1); }
+            50% { transform: translate3d(-3%, -4%, 0) scale(1.08); }
+            100% { transform: translate3d(2%, -1%, 0) scale(1.03); }
+        }
+        .click-feedback { animation: click-feedback 360ms ease-out; }
+        @keyframes click-feedback {
+            0% { transform: scale(1); }
+            45% { transform: scale(0.96); }
+            100% { transform: scale(1); }
         }
         @keyframes view-enter {
             0% { opacity: 0; transform: translateY(28px); }
@@ -276,7 +292,7 @@
                     <h2 class="text-3xl font-extrabold text-white">Editing Presets</h2>
                     <p class="text-slate-400 text-sm">My editing presets, colorings, texts and way more!</p>
                 </div>
-                <button type="button" onclick="switchView('home')" class="inline-flex items-center gap-2 text-xs text-slate-400 hover:text-neon-blue transition-colors"><i data-lucide="arrow-left" class="w-4 h-4"></i>Links</button>
+                <button type="button" onclick="switchView('home')" class="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-white/5 px-5 py-3 text-base font-semibold text-slate-300 hover:border-neon-blue/50 hover:text-neon-blue transition-colors"><i data-lucide="arrow-left" class="w-5 h-5"></i>Links</button>
             </div>
 
             <div id="presetCategories" class="flex flex-wrap justify-center gap-2" aria-label="Preset categories"></div>
@@ -292,7 +308,7 @@
                     <h2 class="text-3xl font-extrabold text-white">Scenepacks</h2>
                     <p class="text-slate-400 text-sm">Complete scenes and motion assets for your next edit.</p>
                 </div>
-                <button type="button" onclick="switchView('home')" class="inline-flex items-center gap-2 text-xs text-slate-400 hover:text-neon-blue transition-colors"><i data-lucide="arrow-left" class="w-4 h-4"></i>Links</button>
+                <button type="button" onclick="switchView('home')" class="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-white/5 px-5 py-3 text-base font-semibold text-slate-300 hover:border-neon-blue/50 hover:text-neon-blue transition-colors"><i data-lucide="arrow-left" class="w-5 h-5"></i>Links</button>
             </div>
             <div id="scenepackCategories" class="space-y-3" aria-label="Scenepack categories"></div>
             <div id="scenepackGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
@@ -300,9 +316,10 @@
 
         <!-- ================= PRODUCT DETAIL VIEW ================= -->
         <section id="productDetailView" class="hidden space-y-6">
-            <button type="button" onclick="goBackToShop()" class="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-neon-blue transition-colors">
-                <i data-lucide="arrow-left" class="w-4 h-4"></i><span>Back to shop</span>
+            <button type="button" onclick="goBackToShop()" class="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-white/5 px-5 py-3 text-base font-semibold text-slate-300 hover:border-neon-blue/50 hover:text-neon-blue transition-colors">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i><span>Back to shop</span>
             </button>
+            <div id="productDetailCategories" class="hidden text-center" aria-label="Product categories"></div>
             <div id="productDetailContent"></div>
         </section>
 
@@ -512,8 +529,23 @@
                 activeView.classList.remove('view-enter');
                 requestAnimationFrame(() => activeView.classList.add('view-enter'));
             }
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (view === 'product') {
+                setTimeout(() => {
+                    const detailView = document.getElementById('productDetailView');
+                    window.scrollTo(0, Math.max(0, detailView.offsetTop - 16));
+                }, 120);
+            } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
         }
+
+        document.addEventListener('click', event => {
+            const target = event.target.closest('button, a, article[onclick], [onclick]');
+            if (!target || target.id === 'downloadGate') return;
+            target.classList.remove('click-feedback');
+            requestAnimationFrame(() => target.classList.add('click-feedback'));
+            setTimeout(() => target.classList.remove('click-feedback'), 420);
+        });
 
         // Login & Auth Management
         async function hashPassword(password, salt) {
@@ -660,11 +692,15 @@
             }));
         }
 
-        function renderCategoryFilters(type, activeCategory = 'all') {
-            const container = document.getElementById(type === 'preset' ? 'presetCategories' : 'scenepackCategories');
+        function renderCategoryFilters(type, activeCategory = 'all', targetId = null) {
+            const container = document.getElementById(targetId || (type === 'preset' ? 'presetCategories' : 'scenepackCategories'));
             if (!container) return;
             if (type === 'preset') {
                 container.innerHTML = categoryButtons(type, getProductCategories(type), activeCategory);
+                const buttons = container.querySelectorAll('[data-filter-type]');
+                buttons.forEach(button => {
+                    button.addEventListener('click', () => setProductCategory(button.dataset.filterType, button.dataset.category));
+                });
                 return;
             }
             const sceneCategories = getProductCategories(type);
@@ -683,7 +719,7 @@
         function categoryButtons(type, categories, activeCategory) {
             return ['all', ...categories].map(category => {
                 const active = category === activeCategory;
-                return `<button type="button" onclick="setProductCategory('${type}', ${JSON.stringify(category)})" class="rounded-xl border px-4 py-2 text-xs font-semibold transition-colors ${active ? 'border-neon-blue/60 bg-neon-blue/15 text-neon-blue' : 'border-slate-800 bg-white/5 text-slate-300 hover:border-neon-blue/40 hover:text-white'}">${category === 'all' ? 'All' : category}</button>`;
+                return `<button type="button" data-filter-type="${escapeHtml(type)}" data-category="${escapeHtml(category)}" class="rounded-xl border px-4 py-2 text-xs font-semibold transition-colors ${active ? 'border-neon-blue/60 bg-neon-blue/15 text-neon-blue' : 'border-slate-800 bg-white/5 text-slate-300 hover:border-neon-blue/40 hover:text-white'}">${category === 'all' ? 'All' : escapeHtml(category)}</button>`;
             }).join('');
         }
 
@@ -694,10 +730,14 @@
                 window.activeProductCategory.scenepack = window.activeProductCategory.scenepack || { movieShow: 'all', characterActor: 'all' };
                 window.activeProductCategory.scenepack[group] = category;
                 renderProducts('scenepack');
+                const sceneProduct = getStoredPresets().find(item => String(item.id) === window.location.hash.split('/')[1]);
+                if (sceneProduct && sceneProduct.type === 'scenepack') renderCategoryFilters('scenepack', window.activeProductCategory.scenepack, 'productDetailCategories');
                 return;
             }
             window.activeProductCategory[type] = category;
             renderProducts(type);
+            const product = getStoredPresets().find(item => String(item.id) === window.location.hash.split('/')[1]);
+            if (product && product.type === type) renderCategoryFilters(type, category, 'productDetailCategories');
         }
 
         function renderProducts(type) {
@@ -782,6 +822,8 @@
             const previewVideos = product.type === 'preset' && Array.isArray(product.previewVideos) ? product.previewVideos : [];
             const videoLinks = previewVideos.length ? `<div class="mt-4 space-y-2"><h4 class="text-sm font-bold text-white">Preview videos</h4>${previewVideos.map((url, index) => `<a href="${url}" target="_blank" rel="noopener" class="block text-sm font-semibold text-neon-blue underline hover:text-white">Preview ${index + 1}</a>`).join('')}</div>` : '';
             container.innerHTML = `<div class="glass-panel rounded-2xl p-5 sm:p-8 border border-neon-blue/30 shadow-glow-lg space-y-6"><div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4"><div><span class="text-[10px] uppercase tracking-widest text-neon-blue">${product.type === 'scenepack' ? 'Scene Pack' : 'Editing Preset'}</span><h2 class="text-3xl font-extrabold text-white mt-2">${product.title}</h2><p class="text-slate-400 mt-2">${product.desc}</p></div><span class="text-2xl font-bold text-neon-blue">${product.price}</span></div><div class="grid grid-cols-1 gap-6 md:grid-cols-2 md:items-start"><div>${media}</div><div class="border-t border-slate-800 pt-5 md:border-t-0 md:border-l md:pl-6 md:pt-0"><h3 class="font-bold text-white mb-2">Product information</h3><p class="text-sm leading-relaxed text-slate-300 whitespace-pre-line">${product.details || product.desc}</p>${videoLinks}<div class="mt-6">${action}</div></div></div></div>`;
+            const activeFilter = product.type === 'preset' ? ((window.activeProductCategory && window.activeProductCategory.preset) || 'all') : ((window.activeProductCategory && window.activeProductCategory.scenepack) || { movieShow: 'all', characterActor: 'all' });
+            renderCategoryFilters(product.type, activeFilter, 'productDetailCategories');
             if (product.type === 'preset') renderPresetPreview(productMedia);
             lucide.createIcons();
         }
