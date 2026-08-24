@@ -63,6 +63,7 @@ window.PRODUCTS_DATA = [
         "presetCategories": [
             "Packs"
         ],
+        "previewVideos": [],
         "movieShows": [],
         "characters": [],
         "details": "details here",
